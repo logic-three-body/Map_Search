@@ -1,9 +1,10 @@
 ﻿#include<iostream>
+#include<string>
 #include<stdlib.h>
 #include<cmath>
 #define MAXTABLESIZE 100000   // 定义允许开辟的最大散列表长度 
 typedef int Index;
-typedef int ElementType;
+typedef std::string ElementType;
 typedef Index Position;
 typedef enum {   // 分别对应：有合法元素、空、有已删除元素 
 	Legitimate, Empty, Deleted
@@ -25,7 +26,7 @@ using namespace std;
 
 int NextPrime(int N);  // 查找素数 
 HashTable CreateTable(int TableSize); // 创建哈希表 
-Index Hash(int Key, int TableSize);   // 哈希函数 
+Index Hash(ElementType Key, int TableSize);   // 哈希函数 
 
 // 查找素数 
 int NextPrime(int N) {
@@ -54,7 +55,10 @@ HashTable CreateTable(int TableSize) {
 	H->Cells = (Cell *)malloc(sizeof(Cell)*H->TableSize);
 	// 初始化单元数组状态 
 	for (int i = 0; i < H->TableSize; i++)
+	{
 		H->Cells[i].Info = Empty;
+		//H->Cells[i].Data="";
+	}	
 	return H;
 }
 
@@ -96,8 +100,14 @@ bool Insert(HashTable H, ElementType Key, int i) {
 }
 
 // 除留余数法哈希函数 
-Index Hash(int Key, int TableSize) {
-	return Key % TableSize;
+Index Hash(ElementType Key, int TableSize) {
+	///return Key % TableSize;
+	unsigned int h = 0;// 散列值函数，初始化为 0 
+	for (int i = 0; i <= Key.length(); i++)//位移映射
+	{
+		h = (h << 5) + Key[i];
+	}
+	return h % TableSize;
 }
 
 
@@ -107,11 +117,11 @@ void output(HashTable H) {
 }
 
 int main() {
-	HashTable H = CreateTable(9);
+	HashTable H = CreateTable(26);
 	int N;
 	cin >> N;
 	for (int i = 0; i < N; i++) {
-		int tmp;
+		ElementType tmp;
 		cin >> tmp;
 		Insert(H, tmp, i);
 	}
