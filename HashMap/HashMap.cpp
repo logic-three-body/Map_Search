@@ -2,9 +2,10 @@
 #include<string>
 #include<stdlib.h>
 #include<cmath>
+using namespace std;
 #define MAXTABLESIZE 100000   // 定义允许开辟的最大散列表长度 
 typedef int Index;
-typedef std::string ElementType;
+typedef string ElementType;
 typedef Index Position;
 typedef enum {   // 分别对应：有合法元素、空、有已删除元素 
 	Legitimate, Empty, Deleted
@@ -16,13 +17,30 @@ struct HashEntry {   //  哈希表存值单元
 	EntryType Info;  // 单元状态	
 };
 
+//以下答案可以写在课设问题里以及解决方案
+/*
+https://bbs.csdn.net/topics/392156390
+嗯，当然不是简单的输出 “hello”了，在Linux下用g++编译后运行试试，会出现“Segmentation fault (core dumped)”，
+why？问题就出在给fr指针分配内存的时候，注意这里用的是C中的malloc而不是new，
+如果你换成new再运行，就不会报错 了，成功的输出“hello”，那为什么malloc就不行呢？
+这就要看malloc()与new()的区别了，关于两者的区别是程序员面试中屡问不爽的经典面试题，
+所以相信一般的程序员都知道它们之间有一个非常重要的区别就是：new在分配内存时会调用默认的构造函数，而malloc不会调用。
+而STL的string在赋值之前需要调用默认的构造函数以初始化string后才能使用，如赋值、打印等操作，
+如果使用malloc分配内存，就不会调 用string默认的构造函数来初始化结构体中的app_name字符串，
+因此这里给其直接赋值是错误的，应该使用new操作符。
+这也提示我们用C++开发程序时，就尽量使用C++中的函数，不要C++与C混合编程，导致使用混淆，比如有时候new分配的内存却用free释放。
+
+
+调试方法：若感觉某语句使程序崩溃，则注释此语句直至程序正常运行，之后逐项排查
+*/
+
 typedef struct HashTbl *HashTable;
 struct HashTbl {  // 哈希表结构体 
 	int TableSize;   // 哈希表大小 
 	Cell *Cells;   // 哈希表存值单元数组 
 };
 
-using namespace std;
+
 
 int NextPrime(int N);  // 查找素数 
 HashTable CreateTable(int TableSize); // 创建哈希表 
@@ -48,11 +66,13 @@ int NextPrime(int N) {
 HashTable CreateTable(int TableSize) {
 	HashTable H;
 	int i;
-	H = (HashTable)malloc(sizeof(struct HashTbl));
+	//H = (HashTable)malloc(sizeof(struct HashTbl)); //ERROR 查看上方注释解说
+	H = new HashTbl;
 	// 保证哈希表最大长度是素数 
 	H->TableSize = NextPrime(TableSize);
 	// 初始化单元数组
-	H->Cells = (Cell *)malloc(sizeof(Cell)*H->TableSize);
+	//H->Cells = (Cell *)malloc(sizeof(Cell)*H->TableSize); //ERROR 查看上方注释解说
+	H->Cells = new Cell[H->TableSize];
 	// 初始化单元数组状态 
 	for (int i = 0; i < H->TableSize; i++)
 	{
@@ -105,7 +125,7 @@ Index Hash(ElementType Key, int TableSize) {
 	unsigned int h = 0;// 散列值函数，初始化为 0 
 	for (int i = 0; i <= Key.length(); i++)//位移映射
 	{
-		h = (h << 5) + Key[i];
+		h = ((h << 5) + Key[i])% TableSize;
 	}
 	return h % TableSize;
 }
