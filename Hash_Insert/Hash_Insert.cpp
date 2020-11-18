@@ -71,10 +71,26 @@ bool Insert(HashTable H, ElementType Key) {
 	if (!p) {  // 关键词未找到，可以插入 
 		NewCell = (Position)malloc(sizeof(struct LNode));
 		NewCell->Data = Key;
+		NewCell->Next = nullptr;//尾插
 		pos = Hash(H->TableSize, Key);   // 初始散列表地址
 		// 将新增结点插到最前面
-		NewCell->Next = H->Heads[pos].Next;
-		H->Heads[pos].Next = NewCell;
+		//尾插
+		List p = H->Heads[pos].Next;
+		if (!p)
+		{
+			H->Heads[pos].Next = NewCell;
+		}
+		else
+		{
+			while (p->Next)
+			{
+				p = p->Next;
+			}
+			p->Next = NewCell;
+		}
+		//头插
+		//NewCell->Next = H->Heads[pos].Next;
+		//H->Heads[pos].Next = NewCell;
 		return true;
 	}
 	else {
@@ -115,6 +131,10 @@ int main() {
 		HashTable H = CreateTable(13);
 		int N;
 		cin >> N;
+		if (!N)
+		{
+			break;
+		}
 		for (int i = 0; i < N; i++) {
 			int tmp;
 			cin >> tmp;
